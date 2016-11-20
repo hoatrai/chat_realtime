@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Trang Chu</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<style>
+.panel{ margin-top:10px}
+.well{ height:400px; overflow:auto;}
+</style>
+<script src="/socket.io/socket.io.js"></script>
+<script src="jquery-3.1.1.min.js"></script> 
+<script>
+var socket = io("http://localhost:3000");
+socket.on('USER_RESISTER_SUCCESS',function(data){
+	//console.log(data);
+	var username ='<li socketid="'+data.id+'" class="list-group-item">'+data.username+'</li>';
+	
+	$(".list-group").append(username);	
+	//$(".hide_when_register_success").hide();
+});
+socket.on('USER_REGISTER_EXISTS',function(data){
+	var error = '<div class="alert alert-danger">Username your register have exists.</div>';
+	$(".form_check_error").prepend(error);
+});
+socket.on('SHOW_USER_CHAT',function(data){
+	var message = '<div class="alert alert-info"><strong>'+data.username+'</strong>: '+data.message+'</div>';
+	$(".well").append(message);
+	
+});
+socket.on('XU_LY_CHOC_GHEO',function(data){
+	alert(data+' vua choc may');	
+});
+socket.on('HIDE_REGISTER',function(){
+	$(".hide_when_register_success").hide();	
+});
+$(document).ready(function(){
+	$("#btnRegister").click(function(){
+		$('.alert-danger').remove();
+		socket.emit('USER_REGISTER',$("#txtUsername").val());	
+		$("#txtUsername").val('');
+	});
+	$("#btnChat").click(function(){
+		socket.emit("USER_CHAT",$("#msgChat").val());
+		$("#msgChat").val('');	
+	});
+	
+	// xu ly choc gheo
+	$("ul").delegate('li','click',function(){
+		var id = $(this).attr('socketid');
+		socket.emit('CHOC_GHEO',id);
+	});
+	
+		
+});
+</script>
+</head>
+
+<body>
+<div class="container-fluid">
+
+<div class="panel-group">
+
+<div class="col-md-12 hide_when_register_success">
+	<div class="panel panel-default">
+<div class="panel-heading">Register user</div>
+<div class="panel-body">
+<div class="col-md-6">
+<form class="form-inline form_check_error">
+ <div class="form-group has-success">
+ 	<label class="control-label" >Username</label>
+    <input type="text" class="form-control" id="txtUsername">
+ 
+ </div>
+ <div class="form-group">
+ 	<button type="button" class="btn btn-primary" id="btnRegister">Register</button>
+ </div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<div class="col-md-4">
+	<div class="panel panel-primary">
+	<div class="panel-heading">User online</div>
+    <div class="panel-body">
+    
+    <ul class="list-group">
+    </ul>
+    	
+    </div>
+</div>
+</div>
+<div class="col-md-8">
+	<div class="panel panel-info">
+		<div class="panel-heading">Chat online</div>
+        <div class="panel-body">
+        	<div class="well">
+            	
+            </div>
+            <form class="form-inline">
+            	<div class="form-group">
+                	<label for="msgChat">Chat</label>
+                   <input type="text" class="form-control" id="msgChat"/>
+                </div>
+                <button type="button" class="btn btn-primary" id="btnChat">Submit</button>
+            </form>
+        </div>
+	</div>
+</div>
+</div><!--panel-group-->
+</div><!--container-fluid-->
+
+
+
+
+</body>
+</html>
